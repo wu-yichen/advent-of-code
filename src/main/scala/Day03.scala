@@ -14,11 +14,15 @@ object Day03 extends App {
       .sortBy(-_._2)
   }
 
-  def getConsumption(inputLines: List[String]) = {
-    val (gamma, epsilon) = inputLines
+  def compute(inputLines: List[String]) = {
+    inputLines
       .map(_.toList)
       .transpose
       .map(calculateOccurrences)
+  }
+
+  def getConsumption(inputLines: List[String]) = {
+    val (gamma, epsilon) = compute(inputLines)
       .foldLeft(("", "")) { (acc, rate) =>
         val gammaBit = rate.head._1
         val epsilonBit = rate.last._1
