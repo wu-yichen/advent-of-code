@@ -2,128 +2,50 @@ import Utils.readFrom
 
 object Day04 extends App {
 
-  val (numbers, allBoards) = {
+  case class BingoNumber(number: Int, var marked: Boolean = false)
 
-    val inputLines = readFrom("Day04/Day04-test.txt").toList
-
-    val randomOrderNumber =
-      inputLines.takeWhile(_.nonEmpty)
-
-    val allBoards = inputLines
-      .diff(randomOrderNumber)
-      .grouped(6)
-      .map(_.drop(1))
-      .map(transBoardInRow)
-      .toList
-
-    (randomOrderNumber.head.split(",").map(_.toInt).toList, allBoards)
+  case class BingoCard(card: List[BingoNumber]) {
+    val rows = card.grouped(5).toList
+    val columns = card.zipWithIndex.groupBy(_._2 % 5).map(_._2.map(_._1))
   }
 
-  def transBoardInRow(row: Seq[String]) = {
-    row
-      .flatMap(_.trim.split("\\s+").map(_.toInt).zipWithIndex)
-      .toList
-      .grouped(5)
-      .toList
-  }
+  def readCard(lines: List[String]): BingoCard =
+    BingoCard(lines.flatMap(_.grouped(3)).map(_.trim.toInt).map(BingoNumber(_)))
 
-  def findWinning(
-      matchedNumberIndexRecords: Seq[Seq[Seq[(Int, Int)]]],
-      startIndex: Int
-  ) = {
+  def markCard(number: Int, card: BingoCard) =
+    card.card.filter(_.number == number).foreach(bg => bg.marked = true)
 
-//    val winningBoardIndexRecord =
-//      matchedNumberIndexRecords.find((board: Seq[Seq[Int]]) =>
-//        board.contains(Seq(0, 1, 2, 3, 4))
-//      )
-//
-//    if (winningBoardIndexRecord.isDefined) {
-//
-//      //      (winningBoard, startIndex - 1, matchedNumberIndexRecords)
-//    } else if (startIndex < numbers.size) {
+  def lineBingo(line: List[BingoNumber]): Boolean =
+    line.count(_.marked) == line.size
 
-    val newMatchedForAllBoards = {
-      val indexes = for {
-        board: Seq[List[(Int, Int)]] <- allBoards
-        row: Seq[(Int, Int)] <- board
-      } yield row.filter(_._1 == numbers(startIndex)).map(_._2)
+  def bingo(bingoCard: BingoCard): Boolean =
+    bingoCard.rows.exists(lineBingo) || bingoCard.columns.exists(lineBingo)
 
-      indexes
-    }
+  def calculateScore(lastDraw: Int, card: BingoCard) =
+    card.card.filterNot(_.marked).map(_.number).sum * lastDraw
 
-    newMatchedForAllBoards
-//    findWinning(newMatchedNumberIndexForAllBoards, startIndex + 1)
+  val input = readFrom("Day04/Day04.txt").toList
 
-//    } else {
-//      (None, -100, Seq.empty[Board])
-//    }
-  }
+  val draw = input.head.split(",").map(_.toInt).toList
 
-//  def getMatchedNumbersIndexForBoard(
-//      board: Seq[Seq[(Int, Int)]],
-//      numbers: List[Int],
-//      startIndex: Int
-//  ) = {
-//    board.map(getMatchedNumbersWithIndex(_, numbers, startIndex))
-//  }
-//
-//  def getMatchedNumbersWithIndex(rows: Seq[(Int, Int)], numbers: List[Int], startIndex: Int) = {
-//    rows.zipWithIndex.filter(_._1 == numbers(startIndex))
-//  }
-//
-//  def getUnMarkedNumbers(
-//      currentBoards: Seq[Board],
-//      startIndex: Int
-//  ) = {
-//    for {
-//      board <- currentBoards
-//    } yield board.map(_.filter(_ != numbers(startIndex)))
-//  }
+  val cards = input.drop(2).grouped(6).map(_.take(5)).map(readCard).toList
 
-//  @tailrec
-//  def findLastMatchedBoard(
-//      boards: Seq[Board],
-//      index: Int
-//  ): (Option[Board], Int) = {
-//
-//    val winningResult = findWinning(numbers, boards, index)
-//    val winningBoard: Option[Board] = winningResult._1
-//    val winningIndex = winningResult._2
-//
-//    if (winningBoard.isDefined && boards.size == 1) {
-//      (winningResult._1, winningResult._2)
-//    } else {
-//      val allLeftBoards = winningResult._3
-//      winningBoard.map(wb =>
-//        allLeftBoards.filterNot((leftBoards: Seq[Row]) => leftBoards == wb)
-//      ) match {
-//        case Some(leftBoards) =>
-//          findLastMatchedBoard(numbers, leftBoards, winningIndex)
-//        case None =>
-//          findLastMatchedBoard(numbers, boards.map(_.transpose), winningIndex)
-//      }
-//    }
-//  }
+  var remainingCards = cards
 
-  def playBingoPart1 = {
-    findWinning(Seq(Seq(Seq.empty[(Int, Int)])), 0)
-//    computeResult((result._1, result._2))
-  }
+  val drawScore = draw.map(dr => {
+    remainingCards.foreach(c => markCard(dr, c))
+    val score = remainingCards
+      .find(bingo)
+      .map(winningCard => calculateScore(dr, winningCard))
+    remainingCards = remainingCards.filterNot(bingo)
+    (dr, score)
+  })
 
-//  def playBingoPart2 = {
-//
-//    val result = findLastMatchedBoard(allBoards, 0)
-//
-//    computeResult(result)
-//  }
+  println(
+    s"Part1: ${drawScore.find(_._2.isDefined).map(_._2.get).getOrElse("")}"
+  )
+  println(
+    s"Part2: ${drawScore.reverse.find(_._2.isDefined).map(_._2.get).getOrElse("")}"
+  )
 
-//  def computeResult(result: (Option[Board], Int)) = {
-//    result._1
-//      .map(_.flatten)
-//      .map(_.sum)
-//      .map(numbers(result._2) * _)
-//      .getOrElse(0)
-//  }
-
-  println(playBingoPart1)
 }
