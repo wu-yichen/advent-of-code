@@ -25,19 +25,17 @@ object Day11 extends App {
 
   case class Accumulator(
       energyLevel: List[List[Energy]],
-      numOfZero: Int = 0,
-      steps: Int = 0
+      numOfZero: Int = 0
   )
 
   def part1 = {
     (0 until 100)
-      .foldLeft(Accumulator(energyLevel, 0)) { (accumulator, _) =>
+      .foldLeft(Accumulator(energyLevel)) { (accumulator, _) =>
         val newEnergyLevel =
           flashIfGreaterThanNine(
             accumulator.energyLevel.map(setEnergyLevel).map(_.toArray).toArray,
             Array.fill(10, 10)(false)
           ).map(_.toList).map(resetToZero).toList
-
         Accumulator(
           newEnergyLevel,
           accumulator.numOfZero + newEnergyLevel.map(_.count(_.value == 0)).sum
@@ -144,8 +142,8 @@ object Day11 extends App {
 
 //  print(part1)
 
+  @tailrec
   def part2(step: Int, energyLevel: Seq[Seq[Energy]]): Int = {
-
     if (energyLevel.forall(_.forall(_.value == 0))) {
       step
     } else {
