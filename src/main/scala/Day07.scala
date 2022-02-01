@@ -5,7 +5,7 @@ import scala.annotation.tailrec
 object Day07 extends App {
 
   val inputLines =
-    readFrom("Day07/Day07.txt").flatMap(_.split(",")).map(_.toInt).toList
+    readFrom("Day07/Day07-test.txt").flatMap(_.split(",")).map(_.toInt).toList
 
   @tailrec
   def getCheapestCostPart1(minimum: Int, inputs: List[Int]): Int = {
@@ -43,6 +43,6 @@ object Day07 extends App {
     }
   }
 
-  println(getCheapestCostPart2(Int.MaxValue, inputLines))
+  println(getCheapestCostPart1(Int.MaxValue, inputLines))
 
 }

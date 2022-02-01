@@ -42,7 +42,4 @@ object Day02 extends App {
       case (horizontal, depth, _) => horizontal * depth
     }
   }
-
-  println(getFinalDepth(inputLines))
-  println(getFinalDepthWithAim(inputLines))
 }

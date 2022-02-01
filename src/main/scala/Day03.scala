@@ -6,24 +6,7 @@ object Day03 extends App {
 
   val inputLines = readFrom("Day03/Day03.txt").toList
 
-  def calculateOccurrences(input: List[Char]) = {
-    input
-      .groupBy(identity)
-      .map {
-        case (bit, times) => (bit, times.size)
-      }
-      .toList
-      .sortBy(-_._2)
-  }
-
-  def compute(inputLines: List[String]) = {
-    inputLines
-      .map(_.toList)
-      .transpose
-      .map(calculateOccurrences)
-  }
-
-  def getConsumption(inputLines: List[String]) = {
+  def calculatePowerConsumption(inputLines: List[String]) = {
     val (gamma, epsilon) = compute(inputLines)
       .foldLeft(("", "")) { (acc, rate) =>
         val gammaBit = rate.head._1
@@ -63,5 +46,20 @@ object Day03 extends App {
     Integer.parseInt(oxygen, 2) * Integer.parseInt(co2, 2)
   }
 
-  println(calculateLifeSupportRating(inputLines))
+  private def calculateOccurrences(input: List[Char]) = {
+    input
+      .groupBy(identity)
+      .map { case (bit, times) =>
+        (bit, times.size)
+      }
+      .toList
+      .sortBy(-_._2)
+  }
+
+  private def compute(inputLines: List[String]) = {
+    inputLines
+      .map(_.toList)
+      .transpose
+      .map(calculateOccurrences)
+  }
 }
